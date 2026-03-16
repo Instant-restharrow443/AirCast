@@ -1,14 +1,8 @@
 <div align="center">
 
-```
-   ___  _         ______           __
-  / _ \(_)____   / ____/___ ______/ /_
- / /_/ / / ___/ / /   / __ `/ ___/ __/
-/ ____/ / /    / /___/ /_/ (__  ) /_
-/_/   /_/_/     \____/\__,_/____/\__/
-```
-
 # AirCast
+
+</div>
 
 ### AI-Powered Air Quality Forecasting and Monitoring Platform
 
