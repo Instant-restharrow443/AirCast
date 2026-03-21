@@ -1,5 +1,6 @@
-Dataset/*.csv
+Dataset/
 __pycache__/
 *.pyc
 env
 files.txt
+notebook/
