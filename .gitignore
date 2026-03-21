@@ -2,3 +2,4 @@ Dataset/*.csv
 __pycache__/
 *.pyc
 env
+files.txt
